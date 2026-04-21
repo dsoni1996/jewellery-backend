@@ -31,8 +31,23 @@ app.use(helmet());
 app.use(mongoSanitize());
 
 /* ── CORS ── */
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    // allow requests with no origin (like postman)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS not allowed"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -51,7 +66,7 @@ const authLimiter = rateLimit({
   max: 20,
   message: { success: false, message: "Too many auth attempts — please try again after 1 hour" },
 });
-app.use(limiter);
+// app.use(limiter);
 
 /* ── Body parsers ── */
 app.use(express.json({ limit: "10kb" }));
@@ -78,12 +93,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.use("/api/auth",     authLimiter, authRoutes);
+app.use("/api/auth",     authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders",   orderRouter);
 app.use("/api/cart",     cartRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/admin",    adminRoutes);
+app.use("/api/homepage", require("./routes/homepage"));
 
 /* ── 404 + Error handlers (must be last) ── */
 app.use(notFound);
