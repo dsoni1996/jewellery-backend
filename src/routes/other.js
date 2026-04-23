@@ -20,10 +20,10 @@ const cc = require("../controllers/cartController");
 
 cartRouter.get    ("/",           protect, cc.getCart);
 cartRouter.post   ("/add",        protect, cc.addToCart);
-cartRouter.put    ("/:itemId",    protect, cc.updateItem);
-cartRouter.delete ("/:itemId",    protect, cc.removeItem);
 cartRouter.post   ("/coupon",     protect, cc.applyCoupon);
 cartRouter.delete ("/coupon",     protect, cc.removeCoupon);
+cartRouter.put    ("/:itemId",    protect, cc.updateItem);
+cartRouter.delete ("/:itemId",    protect, cc.removeItem);
 cartRouter.delete ("/",           protect, cc.clearCart);
 
 /* ── Wishlist ── */

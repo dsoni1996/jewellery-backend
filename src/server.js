@@ -100,6 +100,7 @@ app.use("/api/cart",     cartRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/admin",    adminRoutes);
 app.use("/api/homepage", require("./routes/homepage"));
+app.use("/api/nav",      require("./routes/nav"));
 
 /* ── 404 + Error handlers (must be last) ── */
 app.use(notFound);
