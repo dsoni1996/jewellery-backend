@@ -18,6 +18,8 @@ const authRoutes    = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const { orderRouter, cartRouter, wishlistRouter } = require("./routes/other");
 const adminRoutes   = require("./routes/admin");
+const contactRoutes = require("./routes/contact");
+
 
 /* ────────────────────────────────────────
    Bootstrap
@@ -35,6 +37,7 @@ app.use(mongoSanitize());
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
+  "https://manas-one.vercel.app",
 ];
 
 app.use(cors({
@@ -101,6 +104,8 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/admin",    adminRoutes);
 app.use("/api/homepage", require("./routes/homepage"));
 app.use("/api/nav",      require("./routes/nav"));
+app.use("/api/contact", contactRoutes);
+app.use("/api/wedding", require("./routes/wedding"));
 
 /* ── 404 + Error handlers (must be last) ── */
 app.use(notFound);
