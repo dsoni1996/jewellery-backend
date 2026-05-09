@@ -1,4 +1,4 @@
-const HomePage = require("../models/HomePage");
+const HomePage = require("../models/Homepage");
 const Product  = require("../models/Product");
 
 /* ── Default sections (used if DB is empty) ── */
