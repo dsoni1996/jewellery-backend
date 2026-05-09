@@ -14,14 +14,15 @@ const { AppError } = require("../middleware/error");
 exports.getProducts = async (req, res) => {
   const {
     category, purity, minPrice, maxPrice,
-    inStock, isBestSeller, isNewArrival, isFeatured, isWedding,
-    sort, search, page = 1, limit = 20,
+    inStock, isBestSeller, isNewArrival, isFeatured, isWedding, 
+    occasion, sort, search, page = 1, limit = 20,
   } = req.query;
 
   const filter = { isActive: true };
 
   if (category)     filter.category = { $in: category.split(",") };
   if (purity)       filter["metal.purity"] = { $in: purity.split(",") };
+  if (occasion)     filter.occasion = { $in: occasion.split(",") }
   if (inStock)      filter["inventory.inStock"] = inStock === "true";
   if (isBestSeller) filter.isBestSeller = true;
   if (isNewArrival) filter.isNewArrival = true;

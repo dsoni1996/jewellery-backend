@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const Product  = require("../models/Product");
 const User     = require("../models/User");
 const { Coupon } = require("../models/Cart");
+const FAQ = require("../models/FAQ");
+const Store = require("../models/Store");
 
 /* ── Sample products matching the frontend data structure ── */
 const products = [
@@ -198,6 +200,60 @@ const adminUser = {
   isVerified: true,
 };
 
+
+const faq = [
+      {
+        order: 1,
+        question: "What is BIS hallmarking and do all your products have it?",
+        answer: "BIS (Bureau of Indian Standards) hallmarking is a government certification that guarantees the purity of gold jewellery. Yes, every single piece at MANAS is BIS hallmarked — no exceptions. The hallmark includes the purity grade (22KT, 18KT, etc.), assay centre mark, and year of marking.",
+      },
+      {
+        order: 2,
+        question: "Can I exchange or return jewellery?",
+        answer: "Yes! We offer lifetime exchange on all gold jewellery at current gold rates. For returns, we accept unused pieces within 7 days with original packaging and bill. Diamond jewellery can be exchanged within 30 days.",
+      },
+      {
+        order: 3,
+        question: "Do you offer jewellery repair and cleaning services?",
+        answer: "Absolutely. We offer free cleaning for pieces bought at MANAS. Repair services are available at nominal charges. Just walk into any MANAS store with your original bill.",
+      },
+      {
+        order: 4,
+        question: "How long does home delivery take?",
+        answer: "We deliver across India. Standard delivery takes 5–7 business days. For bridal orders or customised pieces, please allow 15–21 days. All orders are fully insured and dispatched in tamper-proof packaging.",
+      },
+      {
+        order: 5,
+        question: "Can I get jewellery customised or engraved?",
+        answer: "Yes, we love customisation! You can personalise pieces with names, initials, or special dates. Engraving is available on most rings, bangles, and pendants. Visit any store or contact us to discuss your requirements.",
+      },
+      {
+        order: 6,
+        question: "Is my online payment secure?",
+        answer: "Completely. We use 256-bit SSL encryption and support all major payment methods — UPI, credit/debit cards, net banking, and 0% EMI on select cards. We never store your payment details.",
+      },
+    ]
+
+
+const storeData = [
+      {
+        order: 1,
+        city: "Indore (HQ)",
+        address: "42, MG Road, Indore – 452001",
+        phone: "+91 731 421 0000",
+        hours: "10:30 AM – 9:00 PM",
+        mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7407.752705241804!2d76.33854669357912!3d21.823707800000015!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd81b6e5f3f7d71%3A0x774fab255715b69f!2sSarafa%20Market%20-%20Jewellery%20Market!5e0!3m2!1sen!2sin!4v1776925435340!5m2!1sen!2sin",
+      },
+      {
+        order: 2,
+        city: "Indore (Vijay Nagar)",
+        address: "12, Scheme 54, Vijay Nagar, Indore – 452010",
+        phone: "+91 731 421 0001",
+        hours: "10:30 AM – 9:00 PM",
+        mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7407.752705241804!2d76.33854669357912!3d21.823707800000015!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd81b6e5f3f7d71%3A0x774fab255715b69f!2sSarafa%20Market%20-%20Jewellery%20Market!5e0!3m2!1sen!2sin!4v1776925435340!5m2!1sen!2sin",
+      },
+    ]
+
 async function seed() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -206,6 +262,8 @@ async function seed() {
     /* Clear */
     await Product.deleteMany({});
     await Coupon.deleteMany({});
+    await FAQ.deleteMany({});
+    await Store.deleteMany({});
     console.log("🗑  Cleared existing data");
 
     /* Insert */
@@ -214,6 +272,12 @@ async function seed() {
 
     await Coupon.insertMany(coupons);
     console.log(`✅ Seeded ${coupons.length} coupons`);
+
+    await FAQ.insertMany(faq);
+    console.log(`✅ Seeded ${faq.length} FAQs`);
+
+    await Store.insertMany(storeData);
+    console.log(`✅ Seeded ${storeData.length} stores`);
 
     /* Admin user */
     const exists = await User.findOne({ phone: adminUser.phone });
