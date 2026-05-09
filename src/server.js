@@ -38,6 +38,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
   "https://manas-one.vercel.app",
+  "https://jewellery-admin-beta.vercel.app/"
 ];
 
 app.use(cors({
