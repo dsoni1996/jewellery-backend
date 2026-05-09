@@ -1,6 +1,11 @@
 require("dotenv").config();
 require("express-async-errors");
 
+
+//CLOUD NAME dopwdqyo2
+//API KEY 726622621933156
+//api secret p7uwkGA8aUEZGWrinJ5Y2tb2-bQ
+
 const express     = require("express");
 const cors        = require("cors");
 const helmet      = require("helmet");
@@ -107,6 +112,7 @@ app.use("/api/homepage", require("./routes/homepage"));
 app.use("/api/nav",      require("./routes/nav"));
 app.use("/api/contact", contactRoutes);
 app.use("/api/wedding", require("./routes/wedding"));
+app.use("/api/upload", require("./routes/upload"));
 
 /* ── 404 + Error handlers (must be last) ── */
 app.use(notFound);
