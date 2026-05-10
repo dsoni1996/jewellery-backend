@@ -1,5 +1,6 @@
 const User      = require("../models/User");
 const { AppError } = require("../middleware/error");
+const client = require("../utils/whatsapp");
 
 /* ── Helper: send token as cookie + JSON ── */
 const sendToken = (user, statusCode, res) => {
@@ -74,24 +75,43 @@ exports.login = async (req, res) => {
    @desc   Send OTP to phone
    @access Public
 ────────────────────────────────────────── */
+
 exports.sendOtp = async (req, res) => {
   const { phone } = req.body;
   if (!phone) throw new AppError("Phone required", 400);
 
+  // 1. 6-digit OTP Generate karo
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min ki validity
 
+  // 2. User me OTP save karo
   let user = await User.findOne({ phone });
-  if (user) {
-    user.otp = { code: otp, expiresAt };
-    await user.save({ validateBeforeSave: false });
+  if (!user) {
+    user = await User.create({ phone }); // Agar naya user hai toh create kar do
   }
-  // If user not found — they need to register first (or handle as guest OTP)
+  
+  user.otp = { code: otp, expiresAt };
+  await user.save({ validateBeforeSave: false });
 
-  // TODO: integrate SMS gateway (Twilio / MSG91) here
-  console.log(`📱 OTP for ${phone}: ${otp}`);  // dev only
+  // 3. WHATSAPP SE BHEJO
+  try {
+    // WhatsApp web API ko number iss format me chahiye hota hai: 91XXXXXXXXXX@c.us
+    const formattedNumber = phone.replace(/\D/g, ''); // Extra space/dash hatao
+    const chatId = `91${formattedNumber}@c.us`; 
+    
+    // Message ka format (Tum isme Emoji vagera sab daal sakte ho)
+    const message = `Welcome to *Our App*! 🚀\n\nYour secure login OTP is: *${otp}*\n\nThis is valid for 10 minutes. Please do not share it with anyone.`;
 
-  res.json({ success: true, message: "OTP sent", ...(process.env.NODE_ENV === "development" && { otp }) });
+    // Bot se message send karwao
+    await client.sendMessage(chatId, message);
+
+    console.log(`✅ WhatsApp OTP sent to ${phone}: ${otp}`);
+
+    res.json({ success: true, message: "OTP sent to your WhatsApp!" });
+  } catch (error) {
+    console.error("WhatsApp Message Error:", error);
+    throw new AppError("Failed to send WhatsApp message. Bot might not be ready.", 500);
+  }
 };
 
 /* ──────────────────────────────────────────
