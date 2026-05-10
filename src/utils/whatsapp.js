@@ -26,6 +26,14 @@ const client = new Client({
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
     console.log("📲 SCAN THIS QR FROM RENDER LOGS SECTION!");
+    client.on('qr', (qr) => {
+        console.log("======================================================");
+        console.log("👇 COPY THE LONG TEXT STRING BELOW 👇");
+        console.log(qr);
+        console.log("======================================================");
+        console.log("Go to: https://www.the-qrcode-generator.com/");
+        console.log("Select 'Text' option and paste this string there to scan.");
+    });
 });
 
 client.on('ready', () => {
