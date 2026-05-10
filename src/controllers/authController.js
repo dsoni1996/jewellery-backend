@@ -1,6 +1,5 @@
 const User      = require("../models/User");
 const { AppError } = require("../middleware/error");
-const client = require("../utils/whatsapp");
 
 /* ── Helper: send token as cookie + JSON ── */
 const sendToken = (user, statusCode, res) => {
@@ -75,7 +74,6 @@ exports.login = async (req, res) => {
    @desc   Send OTP to phone
    @access Public
 ────────────────────────────────────────── */
-
 exports.sendOtp = async (req, res) => {
   const { phone } = req.body;
   if (!phone) throw new AppError("Phone required", 400);
@@ -87,7 +85,12 @@ exports.sendOtp = async (req, res) => {
   // 2. User me OTP save karo
   let user = await User.findOne({ phone });
   if (!user) {
-    user = await User.create({ phone }); // Agar naya user hai toh create kar do
+    // ✅ FIX 1: Naya account banate time default details taaki DB error na de
+    user = await User.create({ 
+      phone: phone,
+      firstName: "Manas",
+      lastName: "Customer" 
+    }); 
   }
   
   user.otp = { code: otp, expiresAt };
@@ -99,11 +102,11 @@ exports.sendOtp = async (req, res) => {
     const formattedNumber = phone.replace(/\D/g, ''); // Extra space/dash hatao
     const chatId = `91${formattedNumber}@c.us`; 
     
-    // Message ka format (Tum isme Emoji vagera sab daal sakte ho)
-    const message = `Welcome to *Our App*! 🚀\n\nYour secure login OTP is: *${otp}*\n\nThis is valid for 10 minutes. Please do not share it with anyone.`;
+    // Message ka format
+    const message = `💎 Welcome to *MANAS Jewellery*!\n\nYour secure login OTP is: *${otp}*\n\nThis is valid for 10 minutes. Please do not share it with anyone.`;
 
-    // Bot se message send karwao
-    await client.sendMessage(chatId, message);
+    // ✅ FIX 2: Global client use kiya hai circular dependency/undefined function error hatane ke liye
+    await global.whatsappClient.sendMessage(chatId, message);
 
     console.log(`✅ WhatsApp OTP sent to ${phone}: ${otp}`);
 

@@ -46,5 +46,9 @@ mongoose.connection.once('open', () => {
     client.initialize();
 });
 
-// 3. Sabse zaroori: Export bahar hona chahiye!
+
+// 1. Yeh nayi line add karni hai (Global Power)
+global.whatsappClient = client; 
+
+// 2. Yeh line pehle se likhi hogi, isko waise hi rehne do
 module.exports = client;
