@@ -1,54 +1,55 @@
 const { Client, RemoteAuth } = require('whatsapp-web.js');
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
-const qrcode = require('qrcode-terminal');
 
-// 1. Store aur Client ko 'mongoose.connection' block ke BAHAR banao
-const store = new MongoStore({ mongoose: mongoose });
+let client;
 
-const client = new Client({
-    authStrategy: new RemoteAuth({
-        store: store,
-        backupSyncIntervalMs: 300000
-    }),
-    puppeteer: {
-        headless: true, // ✅ Render ke liye TRUE zaroori hai
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--single-process', // ✅ Render ka RAM bachane ke liye
-            '--no-zygote'
-        ]
-    }
-});
+const initWhatsApp = async () => {
+    const store = new MongoStore({ mongoose: mongoose });
 
-client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: true });
-    console.log("📲 SCAN THIS QR FROM RENDER LOGS SECTION!");
-    client.on('qr', (qr) => {
-        console.log("======================================================");
-        console.log("👇 COPY THE LONG TEXT STRING BELOW 👇");
-        console.log(qr);
-        console.log("======================================================");
-        console.log("Go to: https://www.the-qrcode-generator.com/");
-        console.log("Select 'Text' option and paste this string there to scan.");
+    client = new Client({
+        authStrategy: new RemoteAuth({
+            store: store,
+            backupSyncIntervalMs: 600000,
+            clientId: 'manas-jewellery'
+        }),
+        // RAM BACHANE KE LIYE SABSE ZAROORI SETTINGS 👇
+        webVersionCache: {
+            type: 'remote',
+            remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+        },
+        puppeteer: {
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--single-process', // RAM bachane ka asli jadoo
+                '--no-zygote',
+                '--disable-gpu',
+                '--disable-extensions'
+            ],
+        }
     });
-});
 
-client.on('ready', () => {
-    console.log('✅ WhatsApp Bot is Ready & Connected to MongoDB!');
-});
+    client.on('qr', (qr) => {
+        console.log('👇 COPY THIS STRING & SCAN QUICKLY 👇');
+        console.log(qr);
+    });
 
-// 2. DB connect hone ke baad sirf start (initialize) karo
-mongoose.connection.once('open', () => {
-    console.log('MongoDB is open, initializing WhatsApp Client...');
-    client.initialize();
-});
+    client.on('ready', () => {
+        console.log('✅ WhatsApp Bot is Ready & Light-Weight!');
+    });
 
+    // Jab bot disconnect ho toh automatic restart ho jaye
+    client.on('disconnected', (reason) => {
+        console.log('❌ WhatsApp Disconnected!', reason);
+        client.initialize();
+    });
 
-// 1. Yeh nayi line add karni hai (Global Power)
-global.whatsappClient = client; 
+    global.whatsappClient = client;
+    await client.initialize();
+};
 
-// 2. Yeh line pehle se likhi hogi, isko waise hi rehne do
+initWhatsApp();
 module.exports = client;
