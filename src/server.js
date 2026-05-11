@@ -24,7 +24,6 @@ const productRoutes = require("./routes/products");
 const { orderRouter, cartRouter, wishlistRouter } = require("./routes/other");
 const adminRoutes   = require("./routes/admin");
 const contactRoutes = require("./routes/contact");
-require("./utils/whatsapp");
 
 
 /* ────────────────────────────────────────

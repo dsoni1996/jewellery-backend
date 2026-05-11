@@ -1,5 +1,6 @@
-const User      = require("../models/User");
+const User         = require("../models/User");
 const { AppError } = require("../middleware/error");
+const axios        = require("axios");
 
 /* ── Helper: send token as cookie + JSON ── */
 const sendToken = (user, statusCode, res) => {
@@ -41,7 +42,6 @@ exports.register = async (req, res) => {
 
   const user = await User.create({ firstName, lastName, phone, email, password, city });
 
-  // In production: send OTP here
   sendToken(user, 201, res);
 };
 
@@ -79,7 +79,8 @@ exports.sendOtp = async (req, res) => {
   if (!phone) throw new AppError("Phone required", 400);
 
   // 1. 6-digit OTP Generate karo
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  // const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  otp = "123456"; // For testing, hardcoded OTP. Change to above line for production.
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min ki validity
 
   // 2. User me OTP save karo
@@ -96,25 +97,32 @@ exports.sendOtp = async (req, res) => {
   user.otp = { code: otp, expiresAt };
   await user.save({ validateBeforeSave: false });
 
-  // 3. WHATSAPP SE BHEJO
-  try {
-    // WhatsApp web API ko number iss format me chahiye hota hai: 91XXXXXXXXXX@c.us
-    const formattedNumber = phone.replace(/\D/g, ''); // Extra space/dash hatao
-    const chatId = `91${formattedNumber}@c.us`; 
+  res.json({ 
+    success: true, 
+    message: "OTP generated! Please enter the 6-digit code provided by admin." 
+  });
+
+  // 3. Fast2SMS API Call (No RAM Heavy WhatsApp Bot)
+  // try {
+  //   const cleanPhone = phone.replace(/\D/g, ''); // Sirf numbers
     
-    // Message ka format
-    const message = `💎 Welcome to *MANAS Jewellery*!\n\nYour secure login OTP is: *${otp}*\n\nThis is valid for 10 minutes. Please do not share it with anyone.`;
+  //   await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+  //     "variables_values": otp,
+  //     "route": "otp",
+  //     "numbers": cleanPhone,
+  //   }, {
+  //     headers: {
+  //       "authorization": process.env.FAST2SMS_API_KEY
+  //     }
+  //   });
 
-    // ✅ FIX 2: Global client use kiya hai circular dependency/undefined function error hatane ke liye
-    await global.whatsappClient.sendMessage(chatId, message);
+  //   console.log(`✅ SMS OTP sent to ${phone}: ${otp}`);
+  //   res.json({ success: true, message: "OTP sent successfully to your phone!" });
 
-    console.log(`✅ WhatsApp OTP sent to ${phone}: ${otp}`);
-
-    res.json({ success: true, message: "OTP sent to your WhatsApp!" });
-  } catch (error) {
-    console.error("WhatsApp Message Error:", error);
-    throw new AppError("Failed to send WhatsApp message. Bot might not be ready.", 500);
-  }
+  // } catch (error) {
+  //   console.error("Fast2SMS SMS Error:", error.response?.data || error.message);
+  //   throw new AppError("Failed to send OTP. Please check SMS API balance.", 500);
+  // }
 };
 
 /* ──────────────────────────────────────────
